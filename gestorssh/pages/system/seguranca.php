@@ -30,12 +30,18 @@ $_SG['paginaBloquear'] = 'tela-bloqueada.php';
 
 $conn = null;
 if ($_SG['conectaServidor'] == true) {
-    $conn = @new mysqli($_SG['servidor'], $_SG['usuario'], $_SG['senha'], $_SG['banco'], $_SG['porta']);
-    if ($conn->connect_error) {
-        error_log("MySQL ERROR: " . $conn->connect_error);
+    try {
+        $pdoOpts = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
+        if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
+            $pdoOpts[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8mb4";
+        }
+        $conn = new PDO(
+            'mysql:host='.$_SG['servidor'].';port='.$_SG['porta'].';dbname='.$_SG['banco'].';charset=utf8mb4',
+            $_SG['usuario'], $_SG['senha'], $pdoOpts
+        );
+    } catch(PDOException $e) {
+        error_log("PDO ERROR: " . $e->getMessage());
         $conn = null;
-    } else {
-        $conn->set_charset("utf8mb4");
     }
 }
 
@@ -69,65 +75,46 @@ function pega_ip() {
 function validaUsuario($usuario, $senha, $tipo) {
     global $conn;
     global $_SG;
-
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    if ($conn === null) {
-        error_log("DB connection is null in validaUsuario");
-        return false;
-    }
-
-    $login_usuario = $conn->real_escape_string($usuario);
-    $senha_usuario = $conn->real_escape_string($senha);
-
+    if (session_status() == PHP_SESSION_NONE) { session_start(); }
+    if ($conn === null) { error_log("DB null in validaUsuario"); return false; }
+    $login = $conn->quote($usuario);
+    $passw = $conn->quote($senha);
     if ($tipo == "admin") {
-        if (filter_var($login_usuario, FILTER_VALIDATE_EMAIL)) {
-            $sql = "SELECT * FROM admin WHERE email = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+        if (filter_var(trim($usuario, "'"), FILTER_VALIDATE_EMAIL)) {
+            $sql = "SELECT * FROM admin WHERE email = $login AND senha = $passw LIMIT 1";
         } else {
-            $sql = "SELECT * FROM admin WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+            $sql = "SELECT * FROM admin WHERE login = $login AND senha = $passw LIMIT 1";
         }
     } else {
-        if (filter_var($login_usuario, FILTER_VALIDATE_EMAIL)) {
-            $sql = "SELECT * FROM usuario WHERE email = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+        if (filter_var(trim($usuario, "'"), FILTER_VALIDATE_EMAIL)) {
+            $sql = "SELECT * FROM usuario WHERE email = $login AND senha = $passw LIMIT 1";
         } else {
-            $sql = "SELECT * FROM usuario WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+            $sql = "SELECT * FROM usuario WHERE login = $login AND senha = $passw LIMIT 1";
         }
     }
-
-    $result = $conn->query($sql);
-    if (!$result) {
-        error_log("Query error: " . $conn->error);
-        return false;
-    }
-    $resultado = $result->fetch_assoc();
-
-    if (empty($resultado)) {
-        return false;
+    $stmt = $conn->query($sql);
+    if (!$stmt) { error_log("Query error: " . $conn->errorInfo()[2]); return false; }
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (empty($resultado)) { return false; }
+    if ($tipo == "admin") {
+        $_SESSION['usuarioID'] = $resultado['id_administrador'];
+        $_SESSION['usuarioNome'] = $resultado['nome'];
+        $_SESSION['tipo'] = 'admin';
+        $_SESSION['usuarioLogin'] = $resultado['login'];
+        $_SESSION['usuarioSenha'] = $resultado['senha'];
     } else {
-        if ($tipo == "admin") {
-            $_SESSION['usuarioID'] = $resultado['id_administrador'];
-            $_SESSION['usuarioNome'] = $resultado['nome'];
-            $_SESSION['tipo'] = 'admin';
-            $_SESSION['usuarioLogin'] = $resultado['login'];
-            $_SESSION['usuarioSenha'] = $resultado['senha'];
-        } else {
-            $_SESSION['usuarioID'] = $resultado['id_usuario'];
-            $_SESSION['usuarioNome'] = $resultado['nome'];
-            $_SESSION['usuarioLogin'] = $resultado['login'];
-            $_SESSION['usuarioSenha'] = $resultado['senha'];
-            $_SESSION['tipo'] = 'user';
-        }
-        return true;
+        $_SESSION['usuarioID'] = $resultado['id_usuario'];
+        $_SESSION['usuarioNome'] = $resultado['nome'];
+        $_SESSION['usuarioLogin'] = $resultado['login'];
+        $_SESSION['usuarioSenha'] = $resultado['senha'];
+        $_SESSION['tipo'] = 'user';
     }
+    return true;
 }
 
 function protegePagina($tipo) {
     global $_SG;
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
+    if (session_status() == PHP_SESSION_NONE) { session_start(); }
     if (!isset($_SESSION['usuarioID']) or !isset($_SESSION['usuarioNome'])) {
         expulsaVisitante();
     }
@@ -135,17 +122,13 @@ function protegePagina($tipo) {
 
 function expulsaVisitante() {
     global $_SG;
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
+    if (session_status() == PHP_SESSION_NONE) { session_start(); }
     unset($_SESSION['usuarioID'], $_SESSION['usuarioNome'], $_SESSION['usuarioLogin'], $_SESSION['usuarioSenha']);
     header("Location: index.php");
 }
 
 function expulsaSair() {
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
+    if (session_status() == PHP_SESSION_NONE) { session_start(); }
     global $_SG;
     unset($_SESSION['usuarioID'], $_SESSION['usuarioNome'], $_SESSION['usuarioLogin'], $_SESSION['usuarioSenha']);
     session_destroy();
