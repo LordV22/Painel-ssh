@@ -3,32 +3,35 @@ require_once("funcoes.php");
 require_once('pass.php');
 
 $_SG['conectaServidor'] = true;
-// Abre uma conexão com o servidor MySQL?
 $_SG['abreSessao'] = true;
-// Inicia a sessão com um session_start()?
 $_SG['caseSensitive'] = true;
-// Usar case-sensitive?
 $_SG['validaSempre'] = true;
-// Deseja validar o usuário e a senha a cada carregamento de página?
 
-// Evita que, ao mudar os dados do usuário no banco de dado o mesmo contiue logado.
-$_SG['servidor'] = 'localhost';
-// Servidor MySQL
-$_SG['usuario'] = 'root';
-// Usuário MySQL
-$_SG['senha'] = $pass;
-// Senha MySQL
-$_SG['banco'] = 'sshplus';
-// Banco de dados MySQL
+// Suporte a variáveis de ambiente do Railway e localhost
+if (getenv('MYSQLHOST')) {
+    $_SG['servidor'] = getenv('MYSQLHOST');
+    $_SG['usuario'] = getenv('MYSQLUSER');
+    $_SG['senha'] = getenv('MYSQLPASSWORD');
+    $_SG['banco'] = getenv('MYSQLDATABASE');
+    $_SG['porta'] = getenv('MYSQLPORT') ?: '3306';
+} elseif (getenv('DATABASE_URL')) {
+    $dbUrl = parse_url(getenv('DATABASE_URL'));
+    $_SG['servidor'] = $dbUrl['host'];
+    $_SG['usuario'] = $dbUrl['user'];
+    $_SG['senha'] = $dbUrl['pass'];
+    $_SG['banco'] = ltrim($dbUrl['path'], '/');
+    $_SG['porta'] = $dbUrl['port'] ?: '3306';
+} else {
+    $_SG['servidor'] = 'localhost';
+    $_SG['usuario'] = 'root';
+    $_SG['senha'] = $pass;
+    $_SG['banco'] = 'sshplus';
+    $_SG['porta'] = '3306';
+}
+
 $_SG['paginaLogin'] = 'login.php';
-// Página de login
 $_SG['paginaBloquear'] = 'tela-bloqueada.php';
-//Página de Bloqueio
 
-// ======================================
-//   ~ Nao edite a partir deste ponto ~
-// ======================================
-// Verifica se precisa fazer a conexao com o MySQL
 if ($_SG['conectaServidor'] == true) {
     try {
         $pdoOpts = array(
@@ -37,7 +40,12 @@ if ($_SG['conectaServidor'] == true) {
         if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
             $pdoOpts[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8";
         }
-        $conn = new PDO('mysql:host='.$_SG['servidor'].';dbname='.$_SG['banco'].';charset=utf8', $_SG['usuario'], $_SG['senha'], $pdoOpts);
+        $conn = new PDO(
+            'mysql:host='.$_SG['servidor'].';port='.$_SG['porta'].';dbname='.$_SG['banco'].';charset=utf8',
+            $_SG['usuario'],
+            $_SG['senha'],
+            $pdoOpts
+        );
     } catch(PDOException $e) {
         echo 'ERROR: ' . $e->getMessage();
     }
@@ -57,22 +65,14 @@ function my_Sql_regcase($str)
     return $res;
 }
 
-// ======================================
-//  Anti SQL Injector
-// ======================================
-
 function sql_injector($sql)
 {
-    $seg = preg_replace(my_Sql_regcase("/(from|select|insert|delete|where|drop table|show tables|#|\*|--|\\\\)/"),"",$sql); //remove palavras que contenham a sintaxe sql
-    $seg = trim($seg); //limpa espaaos vazios
-    $seg = strip_tags($seg); // tira tags html e php
-    $seg = addslashes($seg); //adiciona barras invertidas a uma string
+    $seg = preg_replace(my_Sql_regcase("/(from|select|insert|delete|where|drop table|show tables|#|\*|--|\\\\)/"),"",$sql);
+    $seg = trim($seg);
+    $seg = strip_tags($seg);
+    $seg = addslashes($seg);
     return $seg;
 }
-
-// ======================================
-//  Pegar IP
-// ======================================
 
 function pega_ip() {
     $ipaddress = '';
@@ -90,58 +90,39 @@ function pega_ip() {
         $ipaddress = getenv('REMOTE_ADDR');
     else
         $ipaddress = 'UNKNOWN';
-
     return $ipaddress;
 }
 
-
 function validaUsuario($usuario, $senha,$tipo) {
-
     global $_SG;
-    /* Inicia a sessao */
     session_start();
-
     $cS = ($_SG['caseSensitive']) ? 'BINARY' : '';
-    // Usa a funco addslashes para escapar as aspas
     $login_usuario = addslashes($usuario);
     $senha_usuario = addslashes($senha);
-
     if($tipo=="admin"){
-        // Monta uma consulta SQL (query) para procurar um usuario
         $sql = "SELECT * FROM admin WHERE login = '".$login_usuario."' AND senha = '".$senha_usuario."' LIMIT 1";
-
     }else{
-        // Monta uma consulta SQL (query) para procurar um usuario
         $sql = "SELECT * FROM usuario WHERE login = '".$login_usuario."' AND senha = '".$senha_usuario."' LIMIT 1";
     }
-
     global $conn;
     $sql = $conn->prepare($sql);
     $sql->execute();
     $resultado = $sql->fetch();
-
-    // Verifica se encontrou algum registro
     if (empty($resultado)) {
-        // Nenhum registro foi encontrado => o usuario e invalido
         return false;
     } else {
-
         if($tipo=="admin"){
-            // Definimos dois valores na sessao com os dados do usuurio
-            $_SESSION['usuarioID'] = $resultado['id_administrador']; // Pega o valor da coluna 'id do registro encontrado no MySQL
-            $_SESSION['usuarioNome'] = $resultado['nome']; // Pega o valor da coluna 'nome' do registro encontrado no MySQL
+            $_SESSION['usuarioID'] = $resultado['id_administrador'];
+            $_SESSION['usuarioNome'] = $resultado['nome'];
             $_SESSION['tipo'] = 'admin';
             $_SESSION['usuarioLogin'] = $resultado['login'];
             $_SESSION['usuarioSenha'] = $resultado['senha'];
-
         }else{
-            // Definimos dois valores na sessao com os dados do usuurio
-            $_SESSION['usuarioID'] = $resultado['id_usuario']; // Pega o valor da coluna 'id do registro encontrado no MySQL
-            $_SESSION['usuarioNome'] = $resultado['nome']; // Pega o valor da coluna 'nome' do registro encontrado no MySQL
+            $_SESSION['usuarioID'] = $resultado['id_usuario'];
+            $_SESSION['usuarioNome'] = $resultado['nome'];
             $_SESSION['usuarioLogin'] = $resultado['login'];
             $_SESSION['usuarioSenha'] = $resultado['senha'];
-            $_SESSION['tipo'] = 'user'; // Pega o valor da coluna 'id do registro encontrado no MySQL
-
+            $_SESSION['tipo'] = 'user';
         }
         return true;
     }
@@ -149,56 +130,36 @@ function validaUsuario($usuario, $senha,$tipo) {
 
 function protegePagina($tipo) {
     global $_SG;
-
-    /* Inicia a sessao */
     session_start();
     if (!isset($_SESSION['usuarioID']) or !isset($_SESSION['usuarioNome'])) {
-        // Nao ha usuurio logado, manda pra pagina de login
         expulsaVisitante();
     } else if (!isset($_SESSION['usuarioID']) or !isset($_SESSION['usuarioNome'])) {
-
-        // Ha usuurio logado, verifica se precisa validar o login novamente
         if ($_SG['validaSempre'] == true) {
-
             if($_SESSION['tipo']=="admin"){
-                // Verifica se os dados salvos na sessao batem com os dados do banco de dados
                 if (!validaUsuario($_SESSION['usuarioLogin'], $_SESSION['usuarioSenha'], "admin")) {
-                    // Os dados n�o batem, manda pra tela de login
                     expulsaVisitante();
                 }
-
             }else{
-                // Verifica se os dados salvos na sessao batem com os dados do banco de dados
                 if (!validaUsuario($_SESSION['usuarioLogin'], $_SESSION['usuarioSenha'], "user")) {
-                    // Os dados nao batem, manda pra tela de login
                     expulsaVisitante();
                 }
             }
-
         }
     }
 }
 
-
 function expulsaVisitante() {
     global $_SG;
-    /* Inicia a sessao */
     session_start();
-    // Remove as variaveis da sessao (caso elas existam)
     unset($_SESSION['usuarioID'], $_SESSION['usuarioNome'], $_SESSION['usuarioLogin'], $_SESSION['usuarioSenha']);
-    // Manda pra tela de login
     header("Location: index.php");
 }
 
 function expulsaSair() {
     session_start();
     global $_SG;
-
-    // Remove as variaveis da sessao (caso elas existam)
     unset($_SESSION['usuarioID'], $_SESSION['usuarioNome'], $_SESSION['usuarioLogin'], $_SESSION['usuarioSenha']);
-    // Finally, destroy the session.
     session_destroy();
-    // Manda pra tela de login
     header("Location: ../index.php");
 }
 ?>
