@@ -75,10 +75,18 @@ function validaUsuario($usuario, $senha, $tipo) {
     $login_usuario = $conn->real_escape_string($usuario);
     $senha_usuario = $conn->real_escape_string($senha);
 
-    if($tipo=="admin"){
-        $sql = "SELECT * FROM admin WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
-    }else{
-        $sql = "SELECT * FROM usuario WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+    if ($tipo == "admin") {
+        if (filter_var($login_usuario, FILTER_VALIDATE_EMAIL)) {
+            $sql = "SELECT * FROM admin WHERE email = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+        } else {
+            $sql = "SELECT * FROM admin WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+        }
+    } else {
+        if (filter_var($login_usuario, FILTER_VALIDATE_EMAIL)) {
+            $sql = "SELECT * FROM usuario WHERE email = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+        } else {
+            $sql = "SELECT * FROM usuario WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
+        }
     }
 
     $result = $conn->query($sql);
@@ -91,13 +99,13 @@ function validaUsuario($usuario, $senha, $tipo) {
     if (empty($resultado)) {
         return false;
     } else {
-        if($tipo=="admin"){
+        if ($tipo == "admin") {
             $_SESSION['usuarioID'] = $resultado['id_administrador'];
             $_SESSION['usuarioNome'] = $resultado['nome'];
             $_SESSION['tipo'] = 'admin';
             $_SESSION['usuarioLogin'] = $resultado['login'];
             $_SESSION['usuarioSenha'] = $resultado['senha'];
-        }else{
+        } else {
             $_SESSION['usuarioID'] = $resultado['id_usuario'];
             $_SESSION['usuarioNome'] = $resultado['nome'];
             $_SESSION['usuarioLogin'] = $resultado['login'];
