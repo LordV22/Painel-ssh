@@ -1,0 +1,14 @@
+{
+  "name": "lordv22/painel-ssh",
+  "description": "Painel SSH Web Free",
+  "require": {
+    "php": ">=8.0",
+    "ext-mysqli": "*",
+    "ext-pdo": "*"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "chmod -R 755 gestorssh/"
+    ]
+  }
+}
