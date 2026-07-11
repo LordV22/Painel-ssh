@@ -1,4 +1,8 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once("funcoes.php");
 require_once('pass.php');
 
@@ -65,7 +69,10 @@ function pega_ip() {
 function validaUsuario($usuario, $senha, $tipo) {
     global $conn;
     global $_SG;
-    session_start();
+
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
 
     if ($conn === null) {
         error_log("DB connection is null in validaUsuario");
@@ -118,7 +125,9 @@ function validaUsuario($usuario, $senha, $tipo) {
 
 function protegePagina($tipo) {
     global $_SG;
-    session_start();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     if (!isset($_SESSION['usuarioID']) or !isset($_SESSION['usuarioNome'])) {
         expulsaVisitante();
     }
@@ -126,13 +135,17 @@ function protegePagina($tipo) {
 
 function expulsaVisitante() {
     global $_SG;
-    session_start();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     unset($_SESSION['usuarioID'], $_SESSION['usuarioNome'], $_SESSION['usuarioLogin'], $_SESSION['usuarioSenha']);
     header("Location: index.php");
 }
 
 function expulsaSair() {
-    session_start();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     global $_SG;
     unset($_SESSION['usuarioID'], $_SESSION['usuarioNome'], $_SESSION['usuarioLogin'], $_SESSION['usuarioSenha']);
     session_destroy();
