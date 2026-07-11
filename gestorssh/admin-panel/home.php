@@ -33,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $msg = '<div class="msg-ok">Usuário atualizado!</div>';
     }
     if ($acao === 'criar-servidor') {
-        $nome = trim($_POST['nome'] ?? ''); $ip = trim($_POST['ip'] ?? ''); $porta = intval($_POST['porta'] ?? 22);
-        if ($nome && $ip) { $conn->prepare("INSERT INTO servidor (servidor,ip,porta) VALUES (?,?,?)")->execute([$nome,$ip,$porta]); $msg = '<div class="msg-ok">Servidor criado!</div>'; }
+        $nome = trim($_POST['nome'] ?? ''); $ip = trim($_POST['ip'] ?? ''); $porta = intval($_POST['porta'] ?? 22); $regiao = $_POST['regiao'] ?? 'america'; $login_s = trim($_POST['login_server'] ?? ''); $senha_s = $_POST['senha_server'] ?? ''; $local = trim($_POST['localizacao'] ?? '');
+        if ($nome && $ip) { $conn->prepare("INSERT INTO servidor (nome,ip_servidor,porta,regiao,login_server,senha,localizacao,localizacao_img,ativo,limite_usuario,site_servidor) VALUES (?,?,?,?,?,?,?,?,1,10,'')")->execute([$nome,$ip,$porta,$regiao,$login_s,$senha_s,$local,$local]); $msg = '<div class="msg-ok">Servidor criado!</div>'; }
         else { $msg = '<div class="msg-erro">Preencha nome e IP.</div>'; }
     }
     if ($acao === 'trocar-senha') {
@@ -181,7 +181,7 @@ th,td{padding:6px;}
 <div style="overflow-x:auto;">
 <table><tr><th>ID</th><th>Nome</th><th>IP</th><th>Porta</th><th>Ações</th></tr>
 <?php foreach ($servs as $s): ?>
-<tr><td><?=$s['id_servidor']?></td><td><?=htmlspecialchars($s['servidor']??'')?></td><td><?=htmlspecialchars($s['ip']??'')?></td><td><?=$s['porta']??'22'?></td>
+<tr><td><?=$s['id_servidor']?></td><td><?=htmlspecialchars(htmlspecialchars($s['nome']??''))?></td><td><?=htmlspecialchars($s['ip_servidor']??'')?></td><td><?=$s['porta']??'22'?></td>
 <td><a href="?page=deletar-servidor&id=<?=$s['id_servidor']?>" style="color:#e74c3c;font-size:11px;" onclick="return confirm('Deletar?')">Del</a></td>
 </tr><?php endforeach; ?>
 </table></div><?php endif; ?>
@@ -190,9 +190,11 @@ th,td{padding:6px;}
 <?php elseif ($page === 'criar-servidor'): ?>
 <div class="section"><h3>Novo Servidor</h3>
 <form method="POST"><input type="hidden" name="acao" value="criar-servidor">
-<div class="row"><div><label>Nome</label><input name="nome" required></div><div><label>IP</label><input name="ip" required></div></div>
-<label>Porta SSH</label><input type="number" name="porta" value="22">
-<button type="submit" class="btn">Criar</button></form></div>
+<div class="row"><div><label>Nome</label><input name="nome" placeholder="Ex: Servidor BR" required></div><div><label>IP</label><input name="ip" placeholder="192.168.1.1" required></div></div>
+<div class="row"><div><label>Região</label><select name="regiao"><option value="america">América</option><option value="europa">Europa</option><option value="asia">Ásia</option><option value="australia">Oceania</option></select></div><div><label>Porta SSH</label><input type="number" name="porta" value="22"></div></div>
+<div class="row"><div><label>Login Servidor</label><input name="login_server" placeholder="root"></div><div><label>Senha Servidor</label><input type="password" name="senha_server"></div></div>
+<label>Localização</label><input name="localizacao" placeholder="Ex: São Paulo, Brasil">
+<button type="submit" class="btn">Criar Servidor</button></form></div>
 
 <?php elseif ($page === 'config'): ?>
 <div class="section"><h3>Trocar Senha</h3>
