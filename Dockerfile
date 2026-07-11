@@ -6,3 +6,5 @@ COPY . /app
 WORKDIR /app
 
 EXPOSE 8080
+
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
