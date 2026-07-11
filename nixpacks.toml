@@ -1,5 +1,8 @@
 [phases.setup]
-nixPkgs = ["php", "phpExtensions.pdo_mysql", "phpExtensions.mysqli", "phpExtensions.pdo", "phpExtensions.mbstring", "phpExtensions.curl", "phpExtensions.gd"]
+nixPkgs = ["php"]
+
+[phases.install]
+cmds = ["install-php-extensions pdo_mysql"]
 
 [start]
 cmd = "php -S 0.0.0.0:\"$PORT\" -t ."
