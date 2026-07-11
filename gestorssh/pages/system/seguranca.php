@@ -32,7 +32,9 @@ $conn = null;
 if ($_SG['conectaServidor'] == true) {
     try {
         $pdoOpts = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
-        if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
+        if (defined('Pdo\Mysql::ATTR_INIT_COMMAND')) {
+            $pdoOpts[\Pdo\Mysql::ATTR_INIT_COMMAND] = "SET NAMES utf8mb4";
+        } elseif (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
             $pdoOpts[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8mb4";
         }
         $conn = new PDO(
