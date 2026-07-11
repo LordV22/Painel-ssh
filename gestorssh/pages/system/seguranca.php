@@ -13,13 +13,6 @@ if (getenv('MYSQLHOST')) {
     $_SG['senha'] = getenv('MYSQLPASSWORD');
     $_SG['banco'] = getenv('MYSQLDATABASE');
     $_SG['porta'] = getenv('MYSQLPORT') ?: '3306';
-} elseif (getenv('DATABASE_URL')) {
-    $dbUrl = parse_url(getenv('DATABASE_URL'));
-    $_SG['servidor'] = $dbUrl['host'];
-    $_SG['usuario'] = $dbUrl['user'];
-    $_SG['senha'] = $dbUrl['pass'];
-    $_SG['banco'] = ltrim($dbUrl['path'], '/');
-    $_SG['porta'] = isset($dbUrl['port']) ? $dbUrl['port'] : '3306';
 } else {
     $_SG['servidor'] = 'mysql.railway.internal';
     $_SG['usuario'] = 'root';
@@ -31,17 +24,14 @@ if (getenv('MYSQLHOST')) {
 $_SG['paginaLogin'] = 'login.php';
 $_SG['paginaBloquear'] = 'tela-bloqueada.php';
 
+$conn = null;
 if ($_SG['conectaServidor'] == true) {
-    $conn = null;
-    try {
-        $dsn = 'mysql:host='.$_SG['servidor'].';port='.$_SG['porta'].';dbname='.$_SG['banco'].';charset=utf8';
-        $conn = new PDO($dsn, $_SG['usuario'], $_SG['senha'], array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_TIMEOUT => 10,
-        ));
-    } catch(PDOException $e) {
-        error_log("PDO ERROR: " . $e->getMessage());
+    $conn = @new mysqli($_SG['servidor'], $_SG['usuario'], $_SG['senha'], $_SG['banco'], $_SG['porta']);
+    if ($conn->connect_error) {
+        error_log("MySQL ERROR: " . $conn->connect_error);
         $conn = null;
+    } else {
+        $conn->set_charset("utf8mb4");
     }
 }
 
@@ -82,16 +72,22 @@ function validaUsuario($usuario, $senha, $tipo) {
         return false;
     }
 
-    $login_usuario = addslashes($usuario);
-    $senha_usuario = addslashes($senha);
+    $login_usuario = $conn->real_escape_string($usuario);
+    $senha_usuario = $conn->real_escape_string($senha);
+
     if($tipo=="admin"){
-        $sql = "SELECT * FROM admin WHERE login = ? AND senha = ? LIMIT 1";
+        $sql = "SELECT * FROM admin WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
     }else{
-        $sql = "SELECT * FROM usuario WHERE login = ? AND senha = ? LIMIT 1";
+        $sql = "SELECT * FROM usuario WHERE login = '$login_usuario' AND senha = '$senha_usuario' LIMIT 1";
     }
-    $sql = $conn->prepare($sql);
-    $sql->execute(array($login_usuario, $senha_usuario));
-    $resultado = $sql->fetch();
+
+    $result = $conn->query($sql);
+    if (!$result) {
+        error_log("Query error: " . $conn->error);
+        return false;
+    }
+    $resultado = $result->fetch_assoc();
+
     if (empty($resultado)) {
         return false;
     } else {
