@@ -310,14 +310,14 @@
 <div class="modal-backdrop" id="recoverModal">
     <div class="modal-box">
         <h4>🔑 Recuperar Acesso</h4>
-        <form name="recupera" action="recuperando.php" method="post">
+        <form name="recupera" action="#" method="post" id="resetForm">
             <div class="form-group">
                 <label class="form-label" for="email">Informe o E-mail</label>
                 <input type="email" class="form-control" name="email" placeholder="Digite seu e-mail" required style="padding-left:14px;">
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" id="closeModal">Cancelar</button>
-                <button type="submit" class="btn-confirm">Confirmar</button>
+                <button type="button" class="btn-confirm" id="resetBtn">Confirmar</button>
             </div>
         </form>
     </div>
@@ -377,6 +377,46 @@
         $("#closeModal").click(function() {
             $("#recoverModal").removeClass("show");
         });
+        $("#resetBtn").click(function() {
+            var email = $("input[name=email]").val().trim();
+            if (email === "") {
+                $("#errorBox").text("Digite seu e-mail.").show();
+                return;
+            }
+            $("#errorBox").hide();
+            $(this).text("Enviando...").prop("disabled", true);
+            $.ajax({
+                url: "admin/reset_senha.php",
+                type: "post",
+                data: { email: email },
+                success: function(response) {
+                    if (response == "1") {
+                        $("#recoverModal").removeClass("show");
+                        Swal.fire({
+                            title: "Senha enviada!",
+                            text: "Verifique seu e-mail. Uma nova senha foi enviada.",
+                            icon: "success",
+                            confirmButtonColor: "#7367f0",
+                            confirmButtonText: "Ok"
+                        });
+                    } else if (response == "2") {
+                        $("#errorBox").text("E-mail inválido.").show();
+                        $("#resetBtn").text("Confirmar").prop("disabled", false);
+                    } else if (response == "3") {
+                        $("#errorBox").text("Erro ao enviar e-mail. Tente novamente.").show();
+                        $("#resetBtn").text("Confirmar").prop("disabled", false);
+                    } else {
+                        $("#errorBox").text("E-mail não encontrado.").show();
+                        $("#resetBtn").text("Confirmar").prop("disabled", false);
+                    }
+                },
+                error: function() {
+                    $("#errorBox").text("Erro de conexão.").show();
+                    $("#resetBtn").text("Confirmar").prop("disabled", false);
+                }
+            });
+        });
+
         $("#recoverModal").click(function(e) {
             if (e.target === this) $(this).removeClass("show");
         });
