@@ -19,7 +19,7 @@ if (getenv('MYSQLHOST')) {
     $_SG['usuario'] = $dbUrl['user'];
     $_SG['senha'] = $dbUrl['pass'];
     $_SG['banco'] = ltrim($dbUrl['path'], '/');
-    $_SG['porta'] = $dbUrl['port'] ?: '3306';
+    $_SG['porta'] = isset($dbUrl['port']) ? $dbUrl['port'] : '3306';
 } else {
     $_SG['servidor'] = 'mysql.railway.internal';
     $_SG['usuario'] = 'root';
@@ -32,17 +32,16 @@ $_SG['paginaLogin'] = 'login.php';
 $_SG['paginaBloquear'] = 'tela-bloqueada.php';
 
 if ($_SG['conectaServidor'] == true) {
+    $conn = null;
     try {
-        $pdoOpts = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
-        if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
-            $pdoOpts[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8";
-        }
-        $conn = new PDO(
-            'mysql:host='.$_SG['servidor'].';port='.$_SG['porta'].';dbname='.$_SG['banco'].';charset=utf8',
-            $_SG['usuario'], $_SG['senha'], $pdoOpts
-        );
+        $dsn = 'mysql:host='.$_SG['servidor'].';port='.$_SG['porta'].';dbname='.$_SG['banco'].';charset=utf8';
+        $conn = new PDO($dsn, $_SG['usuario'], $_SG['senha'], array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_TIMEOUT => 10,
+        ));
     } catch(PDOException $e) {
-        echo 'ERROR: ' . $e->getMessage();
+        error_log("PDO ERROR: " . $e->getMessage());
+        $conn = null;
     }
 }
 
@@ -74,18 +73,24 @@ function pega_ip() {
 }
 
 function validaUsuario($usuario, $senha, $tipo) {
+    global $conn;
     global $_SG;
     session_start();
+
+    if ($conn === null) {
+        error_log("DB connection is null in validaUsuario");
+        return false;
+    }
+
     $login_usuario = addslashes($usuario);
     $senha_usuario = addslashes($senha);
     if($tipo=="admin"){
-        $sql = "SELECT * FROM admin WHERE login = '".$login_usuario."' AND senha = '".$senha_usuario."' LIMIT 1";
+        $sql = "SELECT * FROM admin WHERE login = ? AND senha = ? LIMIT 1";
     }else{
-        $sql = "SELECT * FROM usuario WHERE login = '".$login_usuario."' AND senha = '".$senha_usuario."' LIMIT 1";
+        $sql = "SELECT * FROM usuario WHERE login = ? AND senha = ? LIMIT 1";
     }
-    global $conn;
     $sql = $conn->prepare($sql);
-    $sql->execute();
+    $sql->execute(array($login_usuario, $senha_usuario));
     $resultado = $sql->fetch();
     if (empty($resultado)) {
         return false;
