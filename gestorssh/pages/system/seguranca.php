@@ -7,7 +7,6 @@ $_SG['abreSessao'] = true;
 $_SG['caseSensitive'] = true;
 $_SG['validaSempre'] = true;
 
-// Suporte a variáveis de ambiente do Railway e localhost
 if (getenv('MYSQLHOST')) {
     $_SG['servidor'] = getenv('MYSQLHOST');
     $_SG['usuario'] = getenv('MYSQLUSER');
@@ -22,9 +21,9 @@ if (getenv('MYSQLHOST')) {
     $_SG['banco'] = ltrim($dbUrl['path'], '/');
     $_SG['porta'] = $dbUrl['port'] ?: '3306';
 } else {
-    $_SG['servidor'] = 'localhost';
+    $_SG['servidor'] = 'mysql.railway.internal';
     $_SG['usuario'] = 'root';
-    $_SG['senha'] = $pass;
+    $_SG['senha'] = 'IlvTDnpJyMitmGnTMJjHRTVjCWFRAxFG';
     $_SG['banco'] = 'sshplus';
     $_SG['porta'] = '3306';
 }
@@ -34,69 +33,49 @@ $_SG['paginaBloquear'] = 'tela-bloqueada.php';
 
 if ($_SG['conectaServidor'] == true) {
     try {
-        $pdoOpts = array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        );
+        $pdoOpts = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
         if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
             $pdoOpts[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8";
         }
         $conn = new PDO(
             'mysql:host='.$_SG['servidor'].';port='.$_SG['porta'].';dbname='.$_SG['banco'].';charset=utf8',
-            $_SG['usuario'],
-            $_SG['senha'],
-            $pdoOpts
+            $_SG['usuario'], $_SG['senha'], $pdoOpts
         );
     } catch(PDOException $e) {
         echo 'ERROR: ' . $e->getMessage();
     }
 }
 
-function my_Sql_regcase($str)
-{
+function my_Sql_regcase($str) {
     $res = "";
     $chars = str_split($str);
     foreach ($chars as $char) {
         if (preg_match("/[A-Za-z]/", $char)) {
             $res .= "[" . mb_strtoupper($char, 'UTF-8') . mb_strtolower($char, 'UTF-8') . "]";
-        } else {
-            $res .= $char;
-        }
+        } else { $res .= $char; }
     }
     return $res;
 }
 
-function sql_injector($sql)
-{
+function sql_injector($sql) {
     $seg = preg_replace(my_Sql_regcase("/(from|select|insert|delete|where|drop table|show tables|#|\*|--|\\\\)/"),"",$sql);
-    $seg = trim($seg);
-    $seg = strip_tags($seg);
-    $seg = addslashes($seg);
+    $seg = trim($seg); $seg = strip_tags($seg); $seg = addslashes($seg);
     return $seg;
 }
 
 function pega_ip() {
-    $ipaddress = '';
-    if (getenv('HTTP_CLIENT_IP'))
-        $ipaddress = getenv('HTTP_CLIENT_IP');
-    else if(getenv('HTTP_X_FORWARDED_FOR'))
-        $ipaddress = getenv('HTTP_X_FORWARDED_FOR');
-    else if(getenv('HTTP_X_FORWARDED'))
-        $ipaddress = getenv('HTTP_X_FORWARDED');
-    else if(getenv('HTTP_FORWARDED_FOR'))
-        $ipaddress = getenv('HTTP_FORWARDED_FOR');
-    else if(getenv('HTTP_FORWARDED'))
-        $ipaddress = getenv('HTTP_FORWARDED');
-    else if(getenv('REMOTE_ADDR'))
-        $ipaddress = getenv('REMOTE_ADDR');
-    else
-        $ipaddress = 'UNKNOWN';
-    return $ipaddress;
+    if (getenv('HTTP_CLIENT_IP')) return getenv('HTTP_CLIENT_IP');
+    else if(getenv('HTTP_X_FORWARDED_FOR')) return getenv('HTTP_X_FORWARDED_FOR');
+    else if(getenv('HTTP_X_FORWARDED')) return getenv('HTTP_X_FORWARDED');
+    else if(getenv('HTTP_FORWARDED_FOR')) return getenv('HTTP_FORWARDED_FOR');
+    else if(getenv('HTTP_FORWARDED')) return getenv('HTTP_FORWARDED');
+    else if(getenv('REMOTE_ADDR')) return getenv('REMOTE_ADDR');
+    else return 'UNKNOWN';
 }
 
-function validaUsuario($usuario, $senha,$tipo) {
+function validaUsuario($usuario, $senha, $tipo) {
     global $_SG;
     session_start();
-    $cS = ($_SG['caseSensitive']) ? 'BINARY' : '';
     $login_usuario = addslashes($usuario);
     $senha_usuario = addslashes($senha);
     if($tipo=="admin"){
@@ -133,18 +112,6 @@ function protegePagina($tipo) {
     session_start();
     if (!isset($_SESSION['usuarioID']) or !isset($_SESSION['usuarioNome'])) {
         expulsaVisitante();
-    } else if (!isset($_SESSION['usuarioID']) or !isset($_SESSION['usuarioNome'])) {
-        if ($_SG['validaSempre'] == true) {
-            if($_SESSION['tipo']=="admin"){
-                if (!validaUsuario($_SESSION['usuarioLogin'], $_SESSION['usuarioSenha'], "admin")) {
-                    expulsaVisitante();
-                }
-            }else{
-                if (!validaUsuario($_SESSION['usuarioLogin'], $_SESSION['usuarioSenha'], "user")) {
-                    expulsaVisitante();
-                }
-            }
-        }
     }
 }
 
