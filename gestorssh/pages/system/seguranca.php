@@ -31,11 +31,13 @@ $_SG['paginaBloquear'] = 'tela-bloqueada.php';
 // Verifica se precisa fazer a conexao com o MySQL
 if ($_SG['conectaServidor'] == true) {
     try {
-        $conn = new PDO('mysql:host='.$_SG['servidor'].';dbname='.$_SG['banco'].';charset=utf8', $_SG['usuario'], $_SG['senha'],
-            array(
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
-            ));
+        $pdoOpts = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        );
+        if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
+            $pdoOpts[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8";
+        }
+        $conn = new PDO('mysql:host='.$_SG['servidor'].';dbname='.$_SG['banco'].';charset=utf8', $_SG['usuario'], $_SG['senha'], $pdoOpts);
     } catch(PDOException $e) {
         echo 'ERROR: ' . $e->getMessage();
     }
