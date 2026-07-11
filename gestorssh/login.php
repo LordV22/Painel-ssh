@@ -1,207 +1,348 @@
 <!DOCTYPE html>
-<html class="loading bordered-layout" lang="pt-br" data-layout="bordered-layout" data-textdirection="ltr">
-<!-- BEGIN: Head-->
-
+<html lang="pt-br">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0,minimal-ui">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Painel de gerenciamento vpn">
-    <meta name="keywords" content="sshplus, painel, vpn, ssh, user, servidor">
-    <meta name="author" content="crazy">
     <title>EMPRESA 🚀</title>
-    <link rel="apple-touch-icon" href="../../../app-assets/images/ico/apple-icon-120.png">
-    <link rel="shortcut icon" type="image/x-icon" href="../../../app-assets/images/ico/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600" rel="stylesheet">
-    <!-- BEGIN: Vendor CSS-->
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/vendors.min.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/extensions/sweetalert2.min.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/extensions/ext-component-sweet-alerts.css">
-    <!-- BEGIN: Theme CSS-->
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/bootstrap-extended.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/colors.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/components.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/themes/dark-layout.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/themes/bordered-layout.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/themes/semi-dark-layout.css">
-    <!-- BEGIN: Page CSS-->
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/core/menu/menu-types/vertical-menu.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/forms/form-validation.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/pages/authentication.css">
-    <!-- END: Page CSS-->
-    <!-- BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="../../../assets/css/style.css">
-    <!-- END: Custom CSS-->
+    <link rel="shortcut icon" href="app-assets/images/ico/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary: #7367f0;
+            --primary-dark: #5e50ee;
+            --grad-1: #7367f0;
+            --grad-2: #9e95f5;
+            --bg: #0f1021;
+            --card-bg: #1a1b3a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0f1021 0%, #1a1b3a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e0e0f0;
+        }
+        .login-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(115, 103, 240, 0.25);
+            border: 1px solid rgba(115, 103, 240, 0.2);
+        }
+        .brand {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .brand h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        .brand .badge-empresa {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--grad-1), var(--grad-2));
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .welcome {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .welcome h2 {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .welcome p {
+            font-size: 14px;
+            color: #a0a0c0;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #c0c0e0;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap .icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 14px 12px 44px;
+            border-radius: 10px;
+            border: 1px solid rgba(115, 103, 240, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(115, 103, 240, 0.08);
+            box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.15);
+        }
+        .form-control::placeholder { color: #7070a0; }
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            font-size: 13px;
+        }
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #c0c0e0;
+            cursor: pointer;
+        }
+        .remember input { accent-color: var(--primary); }
+        .forgot {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .forgot:hover { text-decoration: underline; }
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--grad-1), var(--grad-2));
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-login:hover {
+            box-shadow: 0 8px 24px rgba(115, 103, 240, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-login:active { transform: translateY(0); }
+        .divider {
+            text-align: center;
+            margin: 22px 0;
+            position: relative;
+            color: #7070a0;
+            font-size: 13px;
+        }
+        .divider::before,
+        .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: rgba(115, 103, 240, 0.2);
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        .admin-link {
+            text-align: center;
+        }
+        .admin-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .admin-link a:hover { text-decoration: underline; }
+        /* Modal recuperar */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-backdrop.show { display: flex; }
+        .modal-box {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 28px;
+            width: 90%;
+            max-width: 380px;
+            border: 1px solid rgba(115,103,240,0.2);
+        }
+        .modal-box h4 { color: #fff; margin-bottom: 16px; font-size: 18px; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+        .btn-cancel {
+            flex: 1; padding: 10px; border-radius: 8px;
+            background: rgba(255,255,255,0.08); border: none; color: #c0c0e0; cursor: pointer;
+        }
+        .btn-confirm {
+            flex: 1; padding: 10px; border-radius: 8px;
+            background: linear-gradient(90deg, var(--grad-1), var(--grad-2));
+            border: none; color: #fff; cursor: pointer; font-weight: 600;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+        .alert-error {
+            background: rgba(234, 84, 85, 0.15);
+            border: 1px solid rgba(234, 84, 85, 0.4);
+            color: #ff9a9b;
+        }
+    </style>
 </head>
-<!-- BEGIN: Body-->
+<body>
 
-<body class="vertical-layout vertical-menu-modern blank-page navbar-floating footer-static  " data-open="click" data-menu="vertical-menu-modern" data-col="blank-page">
-    <!-- BEGIN: Content-->
-    <div class="app-content content ">
-        <div class="content-overlay"></div>
-        <div class="header-navbar-shadow"></div>
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
+<div class="login-card">
+    <div class="brand">
+        <h1>EMPRESA 🚀</h1>
+        <span class="badge-empresa">Painel de Gerenciamento</span>
+    </div>
 
-                <body class="fundodapagina vertical-layout vertical-menu-modern 1-column  navbar-floating footer-static  menu-collapsed blank-page blank-page" data-open="click" data-menu="vertical-menu-modern" data-col="1-column">
-                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="lineModalLabel"><i class="fas fa-envelope-open-text"></i>Recuperar
-                                        Acesso</h4>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- content goes here -->
-                                    <form name="recupera" action="recuperando.php" method="post">
+    <div class="welcome">
+        <h2>👋 Olá, Seja Bem-vindo!</h2>
+        <p>Entre com seu usuário e senha</p>
+    </div>
 
-                                        <div class="col-md-12 col-12">
-                                            <div class="mb-1">
-                                                <label class="form-label" for="first-name-icon">Informe o E-mail</label>
-                                                <div class="input-group input-group-merge">
-                                                    <span class="input-group-text"><i data-feather="mail"></i></span>
-                                                    <input type="text" class="form-control" name="email" placeholder="Digite..." require="">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 text-center">
-                                            <button class="btn btn-success">Confirmar</button>
-                                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="auth-wrapper auth-basic px-2">
-                        <div class="auth-inner my-2">
-                            <!-- Login basic -->
-                            <div class="card mb-0">
-                                div class="card mb-0">
-                            <div class="card-body">
-                                        <h2 class="text-primary text-center"><a class="nav-link nav-link-style"><b>EMPRESA 🚀</b></h2></a>
-                                    <br>
-                                    <h4 class="card-title mb-1 text-center text-primary">👋 Olá, Seja Bem vindoª!</h4>
-                                    <p class="card-text mb-2 text-center">Entre com seu usuário e senha!</p>
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <div class="mb-1">
-                                                    <label class="form-label" for="first-name-icon">Usuário</label>
-                                                    <div class="input-group input-group-merge">
-                                                        <span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
-                                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                                                <circle cx="12" cy="7" r="4"></circle>
-                                                            </svg></span>
-                                                        <input type="text" class="form-control" id="login" name="login" placeholder="usuário de acesso" required />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="mb-1">
-                                                    <div class="d-flex justify-content-between">
-                                                        <label class="form-label" for="password-icon">Senha</label>
-                                                        <a class="text-primary" data-bs-toggle="modal" data-bs-target="#myModal" id="to-recover">
-                                                            <small>Esqueceu a senha?</small>
-                                                        </a>
-                                                    </div>
-                                                    <div class="input-group input-group-merge">
-                                                        <span class="input-group-text"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lock">
-                                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                                            </svg></span>
-                                                        <input type="password" class="form-control" id="senha" name="senha" placeholder="senha de acesso" required />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="mb-1">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" id="customCheck4">
-                                                        <label class="form-check-label" for="customCheck4">Lembrar</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <button type="button" id="mybtn" class="btn btn-primary w-100" tabindex="4">Entrar</button>
-                                            </div>
-                                        </div>
-                                    <div class="divider my-2">
-                                        <div class="divider-text">ou</div>
-                                    </div>
-                                    <div class="auth-footer-btn d-flex justify-content-center">
-                                        <a class="text-primary text-center" href="./admin">ENTRAR ADM</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- /Login basic -->
-                        </div>
-                    </div>
-            </div>
+    <div class="alert alert-error" id="errorBox"></div>
+
+    <div class="form-group">
+        <label class="form-label" for="login">Usuário</label>
+        <div class="input-wrap">
+            <span class="icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </span>
+            <input type="text" class="form-control" id="login" name="login" placeholder="usuário de acesso" required>
         </div>
     </div>
-    <!-- END: Content-->
 
-    <!-- BEGIN: Vendor JS-->
-    <script src="../../../app-assets/vendors/js/vendors.min.js"></script>
-    <script src="../../../app-assets/js/scripts/extensions/ext-component-sweet-alerts.js"></script>
-    <script src="../../../app-assets/vendors/js/extensions/sweetalert2.all.min.js"></script>
-    <script src="../../../app-assets/vendors/js/forms/validation/jquery.validate.min.js"></script>
-    <script src="../../../app-assets/js/core/app-menu.js"></script>
-    <script src="../../../app-assets/js/core/app.js"></script>
-    <script src="../../../app-assets/js/scripts/pages/auth-login.js"></script>
-    <!-- END: Page JS-->
+    <div class="form-group">
+        <label class="form-label" for="senha">Senha</label>
+        <div class="input-wrap">
+            <span class="icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+            <input type="password" class="form-control" id="senha" name="senha" placeholder="senha de acesso" required>
+        </div>
+    </div>
 
-    <script>
-        $(document).ready(function() {
-            $("#mybtn").click(function() {
-                var username = $("#login").val().trim();
-                var password = $("#senha").val().trim();
+    <div class="row-between">
+        <label class="remember">
+            <input type="checkbox" id="customCheck4"> Lembrar
+        </label>
+        <a href="#" class="forgot" id="to-recover">Esqueceu a senha?</a>
+    </div>
 
-                if (username != "" && password != "") {
-                    $.ajax({
-                        url: 'validacao.php',
-                        type: 'post',
-                        data: {
-                            username: username,
-                            password: password
-                        },
-                        success: function(response) {
-                            var msg = "";
-                            if (response == 1) {
-                                window.location = "home.php";
-                            } else {
-                                Swal.fire({
-                                    title: 'Usuario ou senha incorreto !',
-                                    icon: 'error',
-                                    confirmButtonColor: '#7367f0',
-                                    confirmButtonText: 'Ok'
-                                    }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        location.reload();
-                                    }else{
-                                        location.reload();
-                                    }
-                                })                                
-                            }
-                        }
+    <button type="button" id="mybtn" class="btn-login">Entrar</button>
+
+    <div class="divider">ou</div>
+
+    <div class="admin-link">
+        <a href="./admin">ENTRAR ADM</a>
+    </div>
+</div>
+
+<!-- Modal Recuperar -->
+<div class="modal-backdrop" id="recoverModal">
+    <div class="modal-box">
+        <h4>🔑 Recuperar Acesso</h4>
+        <form name="recupera" action="recuperando.php" method="post">
+            <div class="form-group">
+                <label class="form-label" for="email">Informe o E-mail</label>
+                <input type="email" class="form-control" name="email" placeholder="Digite seu e-mail" required style="padding-left:14px;">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="closeModal">Cancelar</button>
+                <button type="submit" class="btn-confirm">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        $("#mybtn").click(function() {
+            var username = $("#login").val().trim();
+            var password = $("#senha").val().trim();
+
+            if (username === "" || password === "") {
+                $("#errorBox").text("Preencha usuário e senha.").show();
+                return;
+            }
+
+            $("#errorBox").hide();
+
+            $.ajax({
+                url: 'validacao.php',
+                type: 'post',
+                data: { username: username, password: password },
+                success: function(response) {
+                    if (response == 1) {
+                        window.location = "home.php";
+                    } else {
+                        Swal.fire({
+                            title: 'Usuário ou senha incorreto!',
+                            icon: 'error',
+                            confirmButtonColor: '#7367f0',
+                            confirmButtonText: 'Ok'
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Erro de conexão',
+                        icon: 'error',
+                        confirmButtonColor: '#7367f0',
+                        confirmButtonText: 'Ok'
                     });
                 }
             });
         });
-        $(window).on('load', function() {
-            if (feather) {
-                feather.replace({
-                    width: 14,
-                    height: 14
-                });
-            }
-        })
-    </script>
-</body>
-<!-- END: Body-->
 
+        // Enter para logar
+        $("#senha").keypress(function(e) {
+            if (e.which === 13) $("#mybtn").click();
+        });
+
+        // Modal recuperar
+        $("#to-recover").click(function(e) {
+            e.preventDefault();
+            $("#recoverModal").addClass("show");
+        });
+        $("#closeModal").click(function() {
+            $("#recoverModal").removeClass("show");
+        });
+        $("#recoverModal").click(function(e) {
+            if (e.target === this) $(this).removeClass("show");
+        });
+    });
+</script>
+
+</body>
 </html>
